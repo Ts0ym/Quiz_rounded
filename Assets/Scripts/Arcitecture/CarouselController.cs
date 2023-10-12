@@ -42,12 +42,14 @@ public class CarouselController : MonoBehaviour
     [Header("Rotating data")]
     [SerializeField] private float _rotationSpeed = 1;
     private Vector2 _startTouchPosition;
-    private bool _isLocked = false;
+    [SerializeField] private bool _isLocked = false;
 
     [Header("Current answers data")]
     private List<AnswerInfo> _answers = new List<AnswerInfo>();
     private AnswerInfo _changedAnswer;
-    private int _changedAnswerIndex;
+    public int _changedAnswerIndex;
+
+    private List<CustomButton> _currentButtons = new List<CustomButton>();
 
     [Header("Sound prefs")]
     [SerializeField] private AudioController _audioController;
@@ -64,8 +66,10 @@ public class CarouselController : MonoBehaviour
         if (!_isLocked)
         {
             TouchDragging();
+            
         }
         CircleSoundManager();
+        
     }
 
     private void OnEnable()
@@ -83,7 +87,11 @@ public class CarouselController : MonoBehaviour
     private void OnTouchCanceled(InputAction.CallbackContext ctx)
     {
         _isDragging = false;
-        SetChangedAnswer(GetNearestAnswerIndex(_carouselTransform.rotation.eulerAngles.z));
+        if (Vector2.Distance(_startTouchPosition, _inputManager.TouchPosition.ReadValue<Vector2>()) > 0.001f)
+        {
+            SetChangedAnswer(GetNearestAnswerIndex(_carouselTransform.rotation.eulerAngles.z));
+        }
+        
     }
     
     private void TouchDragging()
@@ -155,6 +163,7 @@ public class CarouselController : MonoBehaviour
     private void SetChangedAnswer(int answerIndex)
     {
         _changedAnswer = _answers[answerIndex];
+        _changedAnswerIndex = answerIndex;
         StartRotateTo(Quaternion.Euler(0, 0, _changedAnswer.AnswerAngle));
     }
 
@@ -181,14 +190,48 @@ public class CarouselController : MonoBehaviour
         }
         _lastRotation = currentRotation;
     }
-    
-    public void PlaceButtons(List<string> answerKeys, List<float> answerValues)
+
+    private void ClearButtons()
     {
-        if (answerKeys.Count != answerValues.Count)
+        if (_currentButtons.Count == 0)
         {
             return;
         }
         
+        foreach (CustomButton button in _currentButtons)
+        {
+            Destroy(button.gameObject);
+        }
+        
+        _currentButtons.Clear();
+        _answers.Clear();
+    }
+
+    private IEnumerator FullSpin(float duration)
+    {
+        _isLocked = true;
+        float startRotation = _carouselTransform.rotation.eulerAngles.z;
+        float endRotation = -90;
+        float t = 0.0f;
+
+        while (t < 1.0f)
+        {
+            t += Time.deltaTime / duration;
+            float newRotation = Mathf.Lerp(startRotation, endRotation, t);
+            _carouselTransform.rotation = Quaternion.Euler(0, 0, newRotation);
+            yield return null;
+        }
+
+        _isLocked = false;
+        SetChangedAnswer(0);
+    }
+    
+    public void PlaceButtons(List<string> answerKeys, List<float> answerValues)
+    {
+
+        StartCoroutine(FullSpin(1.5f));
+        
+        ClearButtons();
         int numberOfButtons = answerKeys.Count;
         // Расчитываем угол между каждой кнопкой в указанном угловом диапазоне
         float angleStep = (maxAngle - minAngle) / numberOfButtons;
@@ -222,25 +265,26 @@ public class CarouselController : MonoBehaviour
 
             // Устанавливаем поворот кнопки
             button.transform.localRotation = rotation;
-            button.SetText(angle + $" {i}");
+            button.SetText(answerKeys[i]);
             
             // Добавляем объект с информацией о кнопке в список
             _answers.Add(answer);
+            
+            _currentButtons.Add(button);
         }
-        SetChangedAnswer(0);
     }
 
     public void SetNextAnswer()
     {
-        Debug.Log(_isLocked);
-        if (_answers.Count == 0)
+        if (_answers.Count == 0 || _isLocked)
         {
             return;
         }
 
-        if (_changedAnswerIndex < _answers.Count)
+        if (_changedAnswerIndex < _answers.Count-1)
         {
-            SetChangedAnswer(_changedAnswerIndex++);
+            _changedAnswerIndex += 1;
+            SetChangedAnswer(_changedAnswerIndex);
             return;
         }
 
@@ -250,19 +294,25 @@ public class CarouselController : MonoBehaviour
 
     public void SetPrevAnswer()
     {
-        Debug.Log(_isLocked);
-        if (_answers.Count == 0)
+        if (_answers.Count == 0 || _isLocked)
         {
             return;
         }
+        
 
-        if (_changedAnswerIndex > -1)
+        if (_changedAnswerIndex > 0)
         {
-            SetChangedAnswer(_changedAnswerIndex--);
+            _changedAnswerIndex -= 1;
+            SetChangedAnswer(_changedAnswerIndex);
             return;
         }
 
         _changedAnswerIndex = _answers.Count - 1;
         SetChangedAnswer(_changedAnswerIndex);
+    }
+
+    public AnswerInfo GetAnswer()
+    {
+        return _changedAnswer;
     }
 }

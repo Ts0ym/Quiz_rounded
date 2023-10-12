@@ -20,4 +20,8 @@ public class QuizView : MonoBehaviour, IQuizView
         _questionSection.SetQuestionText(co2question.Question);
         _questionSection.SetQuestionCounterText(_quizController.GetCurrentQuestionIndex() + 1, _quizController.GetQuestionsAmount());
     }
+    public AnswerInfo GetAnswer()
+    {
+        return _answersCarousel.GetAnswer();
+    }
 }

@@ -1,26 +1,31 @@
 [
 	{
-		"question": "The first question",
-		"answerKeys": ["0", "1-2", "3", "4"],
+		"question": "Сколько часов в неделю тратится в вашем доме на готовку еды с использованием техники?",
+		"answerKeys": ["5", "10", "20", "25+"],
 		"answerValues": [0, 23, 45, 56]
 	},
 	{
-		"question": "The second question",
+		"question": "Сколько часов в неделю суммарно ты принимаешь душ?",
 		"answerKeys": ["0", "1-2", "3", "4", "5+"],
 		"answerValues": [0, 23, 45, 56, 67]
 	},
 	{
-		"question": "The third question",
+		"question": "Сколько раз в месяц ты пьешь кофе?",
 		"answerKeys": ["0", "1-2", "3"],
 		"answerValues": [0, 23, 45]
 	},
 	{
-		"question": "The fourth question",
+		"question": "Сколько часов в день ты используешь телефон?",
 		"answerKeys": ["0", "1-2", "3", "4"],
 		"answerValues": [0, 23, 45, 56]
 	},
 	{
-		"question": "The fifth question",
+		"question": "Какая площадь помещения (м²), в котором вы проживаете?",
+		"answerKeys": ["0", "1-2", "3", "4", "5-9"],
+		"answerValues": [0, 23, 45, 56, 68]
+	},
+	{
+		"question": "Сколько часов в месяц ты в среднем ездишь на машине?",
 		"answerKeys": ["0", "1-2", "3", "4", "5-9"],
 		"answerValues": [0, 23, 45, 56, 68]
 	}

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 enum TransitionDirection
 {
@@ -38,6 +39,20 @@ public class AlphaTransition: MonoBehaviour
             float t = (Time.time - startTime) / duration;
             _canvasGroup.alpha = Mathf.Lerp(startAlpha, endAlpha, t);
             yield return null;
+        }
+
+        _canvasGroup.alpha = endAlpha;
+        Image image = GetComponent<Image>();
+        if (image)
+        {
+            if (direction == TransitionDirection.FadeOut)
+            {
+                image.raycastTarget = false;
+            }
+            else
+            {
+                image.raycastTarget = true;
+            }
         }
     }
     

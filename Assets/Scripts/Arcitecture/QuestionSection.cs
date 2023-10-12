@@ -7,7 +7,8 @@ public class QuestionSection : MonoBehaviour
 {
     [SerializeField] private TMP_Text _questionText;
     [SerializeField] private TMP_Text _questionCounterText;
-    
+
+    [SerializeField] private AlphaTransition _sectionUIAlphaController;
     public void SetQuestionText(string text)
     {
         _questionText.text = text;
@@ -16,5 +17,15 @@ public class QuestionSection : MonoBehaviour
     public void SetQuestionCounterText(int currentQuestion, int questionsAmount)
     {
         _questionCounterText.text = $"Вопрос {currentQuestion} из {questionsAmount}";
+    }
+
+    public void HideSectionUI()
+    {
+        _sectionUIAlphaController.StartFadeOut();
+    }
+
+    public void ShowSectionUI()
+    {
+        _sectionUIAlphaController.StartFadeIn();
     }
 }

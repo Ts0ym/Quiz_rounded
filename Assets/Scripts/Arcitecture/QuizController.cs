@@ -13,12 +13,25 @@ public class QuizController : MonoBehaviour, IQuizController
 
     private List<CO2QuizQuestion> _quizQuestions = new List<CO2QuizQuestion>();
     private int _currentQuestionIndex;
+
+    private float CO2Score = 0;
+
+    public event Action answerButtonClickEvent;
     
     private void Start()
     {
-        Debug.Log(jsonFile);
         _quizQuestions = LoadQuizQuestions();
-        StartNewGame();
+        /*StartNewGame();*/
+    }
+
+    private void OnEnable()
+    {
+        answerButtonClickEvent += () =>
+        {
+            CO2Score += (_quizView.GetAnswer().AnswerValue);
+            Debug.Log(CO2Score);
+            SetNextQuestion();
+        };
     }
 
     private List<CO2QuizQuestion> LoadQuizQuestions()
@@ -35,8 +48,10 @@ public class QuizController : MonoBehaviour, IQuizController
         StartNewGame();
     }
 
-    private void StartNewGame()
+    public void StartNewGame()
     {
+        CO2Score = 0;
+        
         if (_quizQuestions.Count == 0)
         {
             throw new Exception("There is no questions loaded!!!");
@@ -63,5 +78,9 @@ public class QuizController : MonoBehaviour, IQuizController
     }
     public int GetQuestionsAmount() => _quizQuestions.Count;
     public int GetCurrentQuestionIndex() => _currentQuestionIndex;
+    
+    public void OnAnswerButtonClick(){
+        answerButtonClickEvent.Invoke();
+    }
 
 }
