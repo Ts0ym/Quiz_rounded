@@ -1,0 +1,27 @@
+[
+	{
+		"question": "The first question",
+		"answerKeys": ["0", "1-2", "3", "4"],
+		"answerValues": [0, 23, 45, 56]
+	},
+	{
+		"question": "The second question",
+		"answerKeys": ["0", "1-2", "3", "4", "5+"],
+		"answerValues": [0, 23, 45, 56, 67]
+	},
+	{
+		"question": "The third question",
+		"answerKeys": ["0", "1-2", "3"],
+		"answerValues": [0, 23, 45]
+	},
+	{
+		"question": "The fourth question",
+		"answerKeys": ["0", "1-2", "3", "4"],
+		"answerValues": [0, 23, 45, 56]
+	},
+	{
+		"question": "The fifth question",
+		"answerKeys": ["0", "1-2", "3", "4", "5-9"],
+		"answerValues": [0, 23, 45, 56, 68]
+	}
+]
