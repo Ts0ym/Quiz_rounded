@@ -149,8 +149,7 @@ public class CarouselController : MonoBehaviour
                 minDiff = currentDiff;
             }
         }
-        
-        return _changedAnswerIndex;
+        return nearestAnswerIndex;
     }
 
     private void SetChangedAnswer(int answerIndex)
@@ -209,7 +208,11 @@ public class CarouselController : MonoBehaviour
             // Создаем кнопку и устанавливаем ее позицию
             CustomButton button = Instantiate(buttonPrefab, _carouselTransform);
             button.transform.localPosition = new Vector3(x, y, 0f);
-            button.SetOnClickFunction(() => SetChangedAnswer(i));
+            var i1 = i;
+            button.SetOnClickFunction(() =>
+            {
+                SetChangedAnswer(i1);
+            });
 
             // Вычисляем угол для поворота кнопки к краю круга
             float rotationAngle = angle - 270f; // -90 градусов для направления к краю
@@ -229,19 +232,37 @@ public class CarouselController : MonoBehaviour
 
     public void SetNextAnswer()
     {
+        Debug.Log(_isLocked);
         if (_answers.Count == 0)
         {
             return;
         }
-        
-        
+
+        if (_changedAnswerIndex < _answers.Count)
+        {
+            SetChangedAnswer(_changedAnswerIndex++);
+            return;
+        }
+
+        _changedAnswerIndex = 0;
+        SetChangedAnswer(_changedAnswerIndex);
     }
 
     public void SetPrevAnswer()
     {
+        Debug.Log(_isLocked);
         if (_answers.Count == 0)
         {
             return;
         }
+
+        if (_changedAnswerIndex > -1)
+        {
+            SetChangedAnswer(_changedAnswerIndex--);
+            return;
+        }
+
+        _changedAnswerIndex = _answers.Count - 1;
+        SetChangedAnswer(_changedAnswerIndex);
     }
 }
