@@ -34,7 +34,8 @@ public class CarouselController : MonoBehaviour
     private Transform _carouselTransform => GetComponent<Transform>(); // Родительский объект для кнопок
     [SerializeField] private float minAngle = 0f; // Минимальный угол в градусах
     [SerializeField] private float maxAngle = 180f; // Максимальный угол в градусах
-
+    [SerializeField] private float _startPosY;
+    
     [Header("Input prefs")]
     [SerializeField] private InputManager _inputManager;
     private bool _isDragging = false;
@@ -61,15 +62,20 @@ public class CarouselController : MonoBehaviour
     private int _currentPosition = 0;
     private float _lastRotation = 0f;
 
+    [SerializeField] private UIAnimationController _animationController;
     private void Update()
     {
+        if (!_animationController.GetState())
+        {
+            return;
+        }
+        
         if (!_isLocked)
         {
             TouchDragging();
             
         }
         CircleSoundManager();
-        
     }
 
     private void OnEnable()
@@ -86,12 +92,17 @@ public class CarouselController : MonoBehaviour
     
     private void OnTouchCanceled(InputAction.CallbackContext ctx)
     {
+        if (_answers.Count == 0)
+        {
+            return;
+        }
+
         _isDragging = false;
+
         if (Vector2.Distance(_startTouchPosition, _inputManager.TouchPosition.ReadValue<Vector2>()) > 0.001f)
         {
             SetChangedAnswer(GetNearestAnswerIndex(_carouselTransform.rotation.eulerAngles.z));
         }
-        
     }
     
     private void TouchDragging()
@@ -162,6 +173,11 @@ public class CarouselController : MonoBehaviour
 
     private void SetChangedAnswer(int answerIndex)
     {
+        if (!(answerIndex >= 0 && answerIndex < _answers.Count))
+        {
+            return;
+        }
+        
         _changedAnswer = _answers[answerIndex];
         _changedAnswerIndex = answerIndex;
         StartRotateTo(Quaternion.Euler(0, 0, _changedAnswer.AnswerAngle));
@@ -287,7 +303,6 @@ public class CarouselController : MonoBehaviour
             SetChangedAnswer(_changedAnswerIndex);
             return;
         }
-
         _changedAnswerIndex = 0;
         SetChangedAnswer(_changedAnswerIndex);
     }

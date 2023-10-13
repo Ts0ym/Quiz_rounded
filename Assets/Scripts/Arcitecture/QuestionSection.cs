@@ -9,9 +9,15 @@ public class QuestionSection : MonoBehaviour
     [SerializeField] private TMP_Text _questionCounterText;
 
     [SerializeField] private AlphaTransition _sectionUIAlphaController;
-    public void SetQuestionText(string text)
+    [SerializeField] private AlphaTransition _questionTextAlphaController;
+    public IEnumerator SetQuestionText(string text)
     {
+        float fadeDuration = 1.5f;
+        
+        _questionTextAlphaController.StartFadeOut(fadeDuration);
+        yield return new WaitForSeconds(fadeDuration);
         _questionText.text = text;
+        _questionTextAlphaController.StartFadeIn(fadeDuration);
     }
 
     public void SetQuestionCounterText(int currentQuestion, int questionsAmount)
@@ -28,4 +34,6 @@ public class QuestionSection : MonoBehaviour
     {
         _sectionUIAlphaController.StartFadeIn();
     }
+    
+    
 }

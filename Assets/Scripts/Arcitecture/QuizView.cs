@@ -16,8 +16,8 @@ public class QuizView : MonoBehaviour, IQuizView
     {
         CO2QuizQuestion co2question = (CO2QuizQuestion)question;
         _answersCarousel.PlaceButtons(co2question.AnswerKeys, co2question.AnswerValues);
-        
-        _questionSection.SetQuestionText(co2question.Question);
+
+        StartCoroutine(_questionSection.SetQuestionText(co2question.Question));
         _questionSection.SetQuestionCounterText(_quizController.GetCurrentQuestionIndex() + 1, _quizController.GetQuestionsAmount());
     }
     public AnswerInfo GetAnswer()

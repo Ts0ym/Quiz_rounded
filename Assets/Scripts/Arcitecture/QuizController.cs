@@ -4,16 +4,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class QuizController : MonoBehaviour, IQuizController
 {
-    public TextAsset jsonFile;
+    [SerializeField] private TextAsset jsonFile;
     [SerializeField] private QuizView _quizView;
+    [SerializeField] private FinalScreenController _finalScreen;
+    public UnityEvent onQuestionsEnds;
+
 
     private List<CO2QuizQuestion> _quizQuestions = new List<CO2QuizQuestion>();
     private int _currentQuestionIndex;
-
     private float CO2Score = 0;
 
     public event Action answerButtonClickEvent;
@@ -45,7 +48,9 @@ public class QuizController : MonoBehaviour, IQuizController
     private void OnQuesionsEnds()
     {
         Debug.Log($"There is no more questions!!!");
-        StartNewGame();
+        /*StartNewGame();*/
+        onQuestionsEnds.Invoke();
+        StartCoroutine(_finalScreen.ShowFinalScreen(Mathf.FloorToInt(CO2Score / 0.00917f), CO2Score));
     }
 
     public void StartNewGame()
