@@ -61,8 +61,98 @@ public class CarouselController : MonoBehaviour
     [SerializeField] private float maxVolume = 1.0f; // Максимальная громкость
     private int _currentPosition = 0;
     private float _lastRotation = 0f;
-
+    
     [SerializeField] private UIAnimationController _animationController;
+    
+    public void SetNextAnswer()
+    {
+        if (_answers.Count == 0 || _isLocked)
+        {
+            return;
+        }
+
+        if (_changedAnswerIndex < _answers.Count-1)
+        {
+            _changedAnswerIndex += 1;
+            SetChangedAnswer(_changedAnswerIndex);
+            return;
+        }
+        _changedAnswerIndex = 0;
+        SetChangedAnswer(_changedAnswerIndex);
+    }
+
+    public void SetPrevAnswer()
+    {
+        if (_answers.Count == 0 || _isLocked)
+        {
+            return;
+        }
+        
+
+        if (_changedAnswerIndex > 0)
+        {
+            _changedAnswerIndex -= 1;
+            SetChangedAnswer(_changedAnswerIndex);
+            return;
+        }
+
+        _changedAnswerIndex = _answers.Count - 1;
+        SetChangedAnswer(_changedAnswerIndex);
+    }
+
+    public AnswerInfo GetAnswer()
+    {
+        return _changedAnswer;
+    }
+    
+    public void PlaceButtons(List<string> answerKeys, List<float> answerValues)
+    {
+
+        StartCoroutine(MakeFullSpin(1.5f));
+        
+        ClearButtons();
+        int numberOfButtons = answerKeys.Count;
+        // Расчитываем угол между каждой кнопкой в указанном угловом диапазоне
+        float angleStep = (maxAngle - minAngle) / numberOfButtons;
+
+        // Создаем кнопки и располагаем их в указанном угловом диапазоне
+        for (int i = 0; i < numberOfButtons; i++)
+        {
+            // Рассчитываем угол для текущей кнопки
+            float angle = minAngle + i * angleStep;
+            
+            // Создаем объект для хранения данных о кнопке
+            AnswerInfo answer = new AnswerInfo(answerKeys[i], answerValues[i], -angle-90);
+            // Рассчитываем положение кнопки вокруг центра круга
+            float x = radius * Mathf.Cos(angle * Mathf.Deg2Rad);
+            float y = radius * Mathf.Sin(angle * Mathf.Deg2Rad);
+
+            // Создаем кнопку и устанавливаем ее позицию
+            CustomButton button = Instantiate(buttonPrefab, _carouselTransform);
+            button.transform.localPosition = new Vector3(x, y, 0f);
+            var i1 = i;
+            button.SetOnClickFunction(() =>
+            {
+                SetChangedAnswer(i1);
+            });
+
+            // Вычисляем угол для поворота кнопки к краю круга
+            float rotationAngle = angle - 270f; // -90 градусов для направления к краю
+
+            // Создаем Quaternion для поворота кнопки
+            Quaternion rotation = Quaternion.Euler(0f, 0f, rotationAngle);
+
+            // Устанавливаем поворот кнопки
+            button.transform.localRotation = rotation;
+            button.SetText(answerKeys[i]);
+            
+            // Добавляем объект с информацией о кнопке в список
+            _answers.Add(answer);
+            
+            _currentButtons.Add(button);
+        }
+    }
+    
     private void Update()
     {
         if (!_animationController.GetState())
@@ -126,7 +216,7 @@ public class CarouselController : MonoBehaviour
         _startTouchPosition = currentTouchPosition;
     }
 
-    public IEnumerator RotateTo(Quaternion targetRotation)
+    private IEnumerator RotateTo(Quaternion targetRotation)
     {
         _isLocked = true;
         
@@ -223,7 +313,7 @@ public class CarouselController : MonoBehaviour
         _answers.Clear();
     }
 
-    private IEnumerator FullSpin(float duration)
+    private IEnumerator MakeFullSpin(float duration)
     {
         _isLocked = true;
         float startRotation = _carouselTransform.rotation.eulerAngles.z;
@@ -240,94 +330,5 @@ public class CarouselController : MonoBehaviour
 
         _isLocked = false;
         SetChangedAnswer(0);
-    }
-    
-    public void PlaceButtons(List<string> answerKeys, List<float> answerValues)
-    {
-
-        StartCoroutine(FullSpin(1.5f));
-        
-        ClearButtons();
-        int numberOfButtons = answerKeys.Count;
-        // Расчитываем угол между каждой кнопкой в указанном угловом диапазоне
-        float angleStep = (maxAngle - minAngle) / numberOfButtons;
-
-        // Создаем кнопки и располагаем их в указанном угловом диапазоне
-        for (int i = 0; i < numberOfButtons; i++)
-        {
-            // Рассчитываем угол для текущей кнопки
-            float angle = minAngle + i * angleStep;
-            
-            // Создаем объект для хранения данных о кнопке
-            AnswerInfo answer = new AnswerInfo(answerKeys[i], answerValues[i], -angle-90);
-            // Рассчитываем положение кнопки вокруг центра круга
-            float x = radius * Mathf.Cos(angle * Mathf.Deg2Rad);
-            float y = radius * Mathf.Sin(angle * Mathf.Deg2Rad);
-
-            // Создаем кнопку и устанавливаем ее позицию
-            CustomButton button = Instantiate(buttonPrefab, _carouselTransform);
-            button.transform.localPosition = new Vector3(x, y, 0f);
-            var i1 = i;
-            button.SetOnClickFunction(() =>
-            {
-                SetChangedAnswer(i1);
-            });
-
-            // Вычисляем угол для поворота кнопки к краю круга
-            float rotationAngle = angle - 270f; // -90 градусов для направления к краю
-
-            // Создаем Quaternion для поворота кнопки
-            Quaternion rotation = Quaternion.Euler(0f, 0f, rotationAngle);
-
-            // Устанавливаем поворот кнопки
-            button.transform.localRotation = rotation;
-            button.SetText(answerKeys[i]);
-            
-            // Добавляем объект с информацией о кнопке в список
-            _answers.Add(answer);
-            
-            _currentButtons.Add(button);
-        }
-    }
-
-    public void SetNextAnswer()
-    {
-        if (_answers.Count == 0 || _isLocked)
-        {
-            return;
-        }
-
-        if (_changedAnswerIndex < _answers.Count-1)
-        {
-            _changedAnswerIndex += 1;
-            SetChangedAnswer(_changedAnswerIndex);
-            return;
-        }
-        _changedAnswerIndex = 0;
-        SetChangedAnswer(_changedAnswerIndex);
-    }
-
-    public void SetPrevAnswer()
-    {
-        if (_answers.Count == 0 || _isLocked)
-        {
-            return;
-        }
-        
-
-        if (_changedAnswerIndex > 0)
-        {
-            _changedAnswerIndex -= 1;
-            SetChangedAnswer(_changedAnswerIndex);
-            return;
-        }
-
-        _changedAnswerIndex = _answers.Count - 1;
-        SetChangedAnswer(_changedAnswerIndex);
-    }
-
-    public AnswerInfo GetAnswer()
-    {
-        return _changedAnswer;
     }
 }

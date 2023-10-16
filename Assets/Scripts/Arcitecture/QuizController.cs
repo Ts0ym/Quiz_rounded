@@ -17,22 +17,21 @@ public class QuizController : MonoBehaviour, IQuizController
 
     private List<CO2QuizQuestion> _quizQuestions = new List<CO2QuizQuestion>();
     private int _currentQuestionIndex;
-    private float CO2Score = 0;
+    private List<float> _co2Score = new List<float>();
 
     public event Action answerButtonClickEvent;
     
     private void Start()
     {
         _quizQuestions = LoadQuizQuestions();
-        /*StartNewGame();*/
     }
 
     private void OnEnable()
     {
         answerButtonClickEvent += () =>
         {
-            CO2Score += (_quizView.GetAnswer().AnswerValue);
-            Debug.Log(CO2Score);
+            _co2Score.Add(_quizView.GetAnswer().AnswerValue);
+            Debug.Log(_co2Score);
             SetNextQuestion();
         };
     }
@@ -50,12 +49,14 @@ public class QuizController : MonoBehaviour, IQuizController
         Debug.Log($"There is no more questions!!!");
         /*StartNewGame();*/
         onQuestionsEnds.Invoke();
-        StartCoroutine(_finalScreen.ShowFinalScreen(Mathf.FloorToInt(CO2Score / 0.00917f), CO2Score));
+        float CO2Value = CalcCO2Value();
+        int treesValue = CalcTreesValue(CO2Value);
+        StartCoroutine(_finalScreen.ShowFinalScreen(treesValue, CO2Value));
     }
 
     public void StartNewGame()
     {
-        CO2Score = 0;
+        _co2Score = new List<float>();
         
         if (_quizQuestions.Count == 0)
         {
@@ -86,6 +87,17 @@ public class QuizController : MonoBehaviour, IQuizController
     
     public void OnAnswerButtonClick(){
         answerButtonClickEvent.Invoke();
+    }
+
+    private float CalcCO2Value()
+    {
+        if (_co2Score.Count < 10) return 0;
+        return _co2Score.Take(8).Sum() + _co2Score[8] * _co2Score[9];
+    }
+
+    private int CalcTreesValue(float value)
+    {
+        return Mathf.FloorToInt(value / 1.1f * 120);
     }
 
 }
