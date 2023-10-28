@@ -44,6 +44,7 @@ public class CarouselController : MonoBehaviour
     [SerializeField] private float _rotationSpeed = 1;
     private Vector2 _startTouchPosition;
     [SerializeField] private bool _isLocked = false;
+    public AnimationCurve rotationCurve;
 
     [Header("Current answers data")]
     private List<AnswerInfo> _answers = new List<AnswerInfo>();
@@ -215,20 +216,24 @@ public class CarouselController : MonoBehaviour
              
         _startTouchPosition = currentTouchPosition;
     }
-
+    
     private IEnumerator RotateTo(Quaternion targetRotation)
     {
         _isLocked = true;
-        
+
         Quaternion startRotation = _carouselTransform.rotation;
+        float totalRotationAngle = Mathf.Abs(targetRotation.z - startRotation.z);
+        float rotationSpeed = 0.08f / totalRotationAngle; // Начальная скорость вращения
         float elapsedTime = 0f;
-        
-        while (elapsedTime < Mathf.Abs(targetRotation.z - startRotation.z) / _rotationSpeed)
+
+        while (elapsedTime < totalRotationAngle / rotationSpeed)
         {
-            
-            float t = elapsedTime / (Mathf.Abs(targetRotation.z - startRotation.z) / _rotationSpeed);
-            
-            _carouselTransform.rotation = Quaternion.Lerp(startRotation, targetRotation, t);
+            float t = elapsedTime / (totalRotationAngle / rotationSpeed);
+            float curveValue = rotationCurve.Evaluate(t); // Получить значение кривой интерполяции
+            float currentRotationAngle = Mathf.Lerp(0, totalRotationAngle, t);
+            rotationSpeed = 0.5f / (totalRotationAngle - currentRotationAngle + 1); // Изменение скорости вращения в зависимости от угла
+
+            _carouselTransform.rotation = Quaternion.Lerp(startRotation, targetRotation, curveValue);
             elapsedTime += Time.deltaTime;
             yield return null;
         }

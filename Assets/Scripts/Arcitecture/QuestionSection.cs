@@ -10,9 +10,10 @@ public class QuestionSection : MonoBehaviour
 
     [SerializeField] private AlphaTransition _sectionUIAlphaController;
     [SerializeField] private AlphaTransition _questionTextAlphaController;
+    
     public IEnumerator SetQuestionText(string text)
     {
-        float fadeDuration = 1.5f;
+        float fadeDuration = 0.3f;
         
         _questionTextAlphaController.StartFadeOut(fadeDuration);
         yield return new WaitForSeconds(fadeDuration);
