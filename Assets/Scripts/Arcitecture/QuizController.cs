@@ -19,6 +19,8 @@ public class QuizController : MonoBehaviour, IQuizController
     private int _currentQuestionIndex;
     private List<float> _co2Score = new List<float>();
 
+    private bool _isButtonBlocked = false;
+
     public event Action answerButtonClickEvent;
     
     private void Start()
@@ -30,10 +32,21 @@ public class QuizController : MonoBehaviour, IQuizController
     {
         answerButtonClickEvent += () =>
         {
-            _co2Score.Add(_quizView.GetAnswer().AnswerValue);
-            Debug.Log(_co2Score);
-            SetNextQuestion();
+            if (_isButtonBlocked == false)
+            {
+                _co2Score.Add(_quizView.GetAnswer().AnswerValue);
+                Debug.Log(_co2Score);
+                _isButtonBlocked = true;
+                SetNextQuestion();
+                StartCoroutine(UnblockButtonCoroutine());
+            }
         };
+    }
+
+    private IEnumerator UnblockButtonCoroutine()
+    {
+        yield return new WaitForSeconds(2);
+        _isButtonBlocked = false;
     }
 
     private List<CO2QuizQuestion> LoadQuizQuestions()
