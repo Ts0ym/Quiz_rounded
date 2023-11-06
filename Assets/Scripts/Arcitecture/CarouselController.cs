@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using AwakeSolutions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
@@ -11,6 +13,12 @@ using UnityEngine.UI;
 using Quaternion = UnityEngine.Quaternion;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
+
+[System.Serializable]
+public class RotationSpeedData
+{
+    public float rotationSpeed;
+}
 
 public class AnswerInfo
 {
@@ -41,11 +49,12 @@ public class CarouselController : MonoBehaviour
     private bool _isDragging = false;
     
     [Header("Rotating data")]
-    [SerializeField] private float _rotationSpeed = 1;
+    [SerializeField] private float _rotationSpeed;
     private Vector2 _startTouchPosition;
     [SerializeField] private bool _isLocked = false;
     public AnimationCurve rotationCurve;
-
+    private Vector2 _previousTouchPosition;
+    
     [Header("Current answers data")]
     private List<AnswerInfo> _answers = new List<AnswerInfo>();
     private AnswerInfo _changedAnswer;
@@ -173,6 +182,10 @@ public class CarouselController : MonoBehaviour
     {
         _inputManager.IsTouched.started += OnTouchStarted;
         _inputManager.IsTouched.canceled += OnTouchCanceled;
+        
+        string json = File.ReadAllText(Path.Combine(Application.streamingAssetsPath, "settings.json")); // Замените "rotationSpeedData.json" на путь к вашему JSON файлу
+        Debug.Log($"Loaded rotatingSpeed {JsonUtility.FromJson<RotationSpeedData>(json).rotationSpeed}");
+        _rotationSpeed = JsonUtility.FromJson<RotationSpeedData>(json).rotationSpeed;
     }
 
     private void OnTouchStarted(InputAction.CallbackContext ctx)
@@ -196,7 +209,7 @@ public class CarouselController : MonoBehaviour
         }
     }
     
-    private void TouchDragging()
+    /*private void TouchDragging()
     {
         if (!_isDragging)
         {
@@ -215,9 +228,57 @@ public class CarouselController : MonoBehaviour
         }
              
         _startTouchPosition = currentTouchPosition;
+    }*/
+    
+    private void TouchDragging()
+    {
+        if (!_isDragging)
+        {
+            return;
+        }
+
+        Vector2 currentTouchPosition = _inputManager.TouchPosition.ReadValue<Vector2>();
+
+        if (_previousTouchPosition == Vector2.zero)
+        {
+            _previousTouchPosition = currentTouchPosition;
+            return;
+        }
+
+        Vector2 delta = currentTouchPosition - _previousTouchPosition;
+    
+        float angle = Vector2.SignedAngle(Vector2.up, new Vector2(delta.x, 0)) * 0.001f; // Используем (1, 0) как начальную точку.
+
+        _carouselTransform.Rotate(Vector3.forward, -angle * _rotationSpeed);
+     
+        _previousTouchPosition = currentTouchPosition;
     }
     
-    private IEnumerator RotateTo(Quaternion targetRotation)
+    /*private void TouchDragging()
+    {
+        if (!_isDragging)
+        {
+            return;
+        }
+
+        Vector2 currentTouchPosition = _inputManager.TouchPosition.ReadValue<Vector2>();
+
+        if (_previousTouchPosition == Vector2.zero)
+        {
+            _previousTouchPosition = currentTouchPosition;
+            return;
+        }
+
+        float delta = currentTouchPosition.x - _previousTouchPosition.x;
+
+        _carouselTransform.Rotate(Vector3.forward, delta * _rotationSpeed * 0.005f);
+
+        _previousTouchPosition = currentTouchPosition;
+    }*/
+    
+   
+    
+    /*private IEnumerator RotateTo(Quaternion targetRotation)
     {
         _isLocked = true;
 
@@ -234,6 +295,28 @@ public class CarouselController : MonoBehaviour
             rotationSpeed = 0.5f / (totalRotationAngle - currentRotationAngle + 1); // Изменение скорости вращения в зависимости от угла
 
             _carouselTransform.rotation = Quaternion.Lerp(startRotation, targetRotation, curveValue);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        _carouselTransform.rotation = targetRotation;
+        _isLocked = false;
+    }*/
+    private IEnumerator RotateTo(Quaternion targetRotation)
+    {
+        _isLocked = true;
+
+        Quaternion startRotation = _carouselTransform.rotation;
+        float totalRotationAngle = Quaternion.Angle(startRotation, targetRotation);
+        float rotationSpeed = 45f; // Здесь можно задать желаемую скорость в градусах в секунду
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < totalRotationAngle / rotationSpeed)
+        {
+            float t = elapsedTime / (totalRotationAngle / rotationSpeed);
+            float curveValue = rotationCurve.Evaluate(t); // Получить значение кривой интерполяции
+
+            _carouselTransform.rotation = Quaternion.Slerp(startRotation, targetRotation, curveValue);
             elapsedTime += Time.deltaTime;
             yield return null;
         }
@@ -296,7 +379,8 @@ public class CarouselController : MonoBehaviour
         // Если позиция изменилась
         if (newPosition != _currentPosition)
         {
-            _audioController.PlayClickSound(volume);
+            /*_audioController.PlayClickSound(volume);*/
+            AwakeSoundManager.Play("click");
             _currentPosition = newPosition;
         }
         _lastRotation = currentRotation;

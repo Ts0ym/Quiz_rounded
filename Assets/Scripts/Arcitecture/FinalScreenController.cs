@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -22,8 +23,9 @@ public class FinalScreenController : MonoBehaviour
 
     public IEnumerator ShowFinalScreen(int treesValue, float co2Value)
     {
+        float roundedValue = (float)Math.Round(co2Value, 3);
         _alphaTransition.StartFadeIn(_fadeInDuration);
-        SetFinalScreenText(treesValue, co2Value);
+        SetFinalScreenText(treesValue, roundedValue);
         yield return new WaitForSeconds(_showDuration);
         _alphaTransition.StartFadeOut(_fadeOutDuration);
         

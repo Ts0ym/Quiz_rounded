@@ -19,4 +19,16 @@ public class UIAnimationController : MonoBehaviour
         _animator.SetBool(IsActive, _isActive);
     }
 
+    public void SetActiveState()
+    {
+        _isActive = true;
+        _animator.SetBool(IsActive, _isActive);
+    }
+    
+    public void SetUnactiveState()
+    {
+        _isActive = false;
+        _animator.SetBool(IsActive, _isActive);
+    }
+
 }
