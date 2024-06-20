@@ -67,7 +67,6 @@ public class QuizController : MonoBehaviour, IQuizController
     private List<CO2QuizQuestion> LoadQuizQuestions()
     {
         List<CO2QuizQuestion> quizQuestions = DataLoader.GetListFromJSONfile<CO2QuizQuestion>(jsonFile.text);
-        
         Debug.Log($"Loaded {quizQuestions.Count} questions from file");
         return quizQuestions;
     }
@@ -92,8 +91,6 @@ public class QuizController : MonoBehaviour, IQuizController
             _isExited = true;
             onTimerEnds.Invoke();
         }
-        
-        Debug.Log(_timer);
     }
 
     private void ResetTimer()
@@ -109,6 +106,7 @@ public class QuizController : MonoBehaviour, IQuizController
         {
             throw new Exception("There is no questions loaded!!!");
         }
+        
         _currentQuestionIndex = 0;
         _quizView.SetQuestion(_quizQuestions[_currentQuestionIndex]);
         

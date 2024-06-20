@@ -74,6 +74,32 @@ public class CarouselController : MonoBehaviour
     
     [SerializeField] private UIAnimationController _animationController;
     
+    private void Update()
+    {
+        if (!_animationController.GetState())
+        {
+            return;
+        }
+        
+        if (!_isLocked)
+        {
+            TouchDragging();
+            
+        }
+        
+        CircleSoundManager();
+    }
+
+    private void OnEnable()
+    {
+        _inputManager.IsTouched.started += OnTouchStarted;
+        _inputManager.IsTouched.canceled += OnTouchCanceled;
+        
+        string json = File.ReadAllText(Path.Combine(Application.streamingAssetsPath, "settings.json")); // Замените "rotationSpeedData.json" на путь к вашему JSON файлу
+        Debug.Log($"Loaded rotatingSpeed {JsonUtility.FromJson<RotationSpeedData>(json).rotationSpeed}");
+        _rotationSpeed = JsonUtility.FromJson<RotationSpeedData>(json).rotationSpeed;
+    }
+    
     public void SetNextAnswer()
     {
         if (_answers.Count == 0 || _isLocked)
@@ -98,7 +124,6 @@ public class CarouselController : MonoBehaviour
             return;
         }
         
-
         if (_changedAnswerIndex > 0)
         {
             _changedAnswerIndex -= 1;
@@ -161,31 +186,6 @@ public class CarouselController : MonoBehaviour
             
             _currentButtons.Add(button);
         }
-    }
-    
-    private void Update()
-    {
-        if (!_animationController.GetState())
-        {
-            return;
-        }
-        
-        if (!_isLocked)
-        {
-            TouchDragging();
-            
-        }
-        CircleSoundManager();
-    }
-
-    private void OnEnable()
-    {
-        _inputManager.IsTouched.started += OnTouchStarted;
-        _inputManager.IsTouched.canceled += OnTouchCanceled;
-        
-        string json = File.ReadAllText(Path.Combine(Application.streamingAssetsPath, "settings.json")); // Замените "rotationSpeedData.json" на путь к вашему JSON файлу
-        Debug.Log($"Loaded rotatingSpeed {JsonUtility.FromJson<RotationSpeedData>(json).rotationSpeed}");
-        _rotationSpeed = JsonUtility.FromJson<RotationSpeedData>(json).rotationSpeed;
     }
 
     private void OnTouchStarted(InputAction.CallbackContext ctx)
