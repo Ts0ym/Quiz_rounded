@@ -5,6 +5,10 @@
 Пользователь отвечает на вопросы и в результате видит количество потребляемого им CO2 в год. 
 Вопросы загружаются из JSON файла.
 
+## Видео с демонстрацией работы на рабочем стенде
+1) https://player.smotrim.ru/iframe/video/id/2708944/sid/smotrim/isPlay/true/mute/true/?acc_video_id=2899489 _Тайминг 0:51 - 1:13_
+2) https://drive.google.com/file/d/1t6rtfgyMmSNThZKBh-g5n1ooUK6zI45g/view?usp=sharing
+
 ## Особенности
 - Адаптирован по круглий дисплей с поддержкой сенсорного управления
 - Загрузка вопросов из JSON файла
